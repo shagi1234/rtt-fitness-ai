@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "473987561962",
+    "project_id": "rttraining-e7dae",
+    "storage_bucket": "rttraining-e7dae.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:473987561962:android:d9109a06864d61063d1a93",
+        "android_client_info": {
+          "package_name": "com.readytotraining"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "473987561962-b47054msl1ef8rkk50qvf8gtfmb7ev8t.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCqWaA5vFEfipe1yNfUlzVbwrnX4hzkXqQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "473987561962-ar9lge99cstt6ii2slnlmb713rdacitk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "473987561962-gqe3hs0h5s1mdcmkt9rtaqae8793m9b1.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.readytotraining",
+                "app_store_id": "6737291753"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

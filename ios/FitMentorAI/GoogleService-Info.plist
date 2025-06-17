@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>473987561962-gqe3hs0h5s1mdcmkt9rtaqae8793m9b1.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.473987561962-gqe3hs0h5s1mdcmkt9rtaqae8793m9b1</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>473987561962-ejhdqtek6gn01gden438mtpn37aeclhf.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyAOtUG2MBoTv2N9DbbEoVKRe9XXBcZs5gU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>473987561962</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.readytotraining</string>
+	<key>PROJECT_ID</key>
+	<string>rttraining-e7dae</string>
+	<key>STORAGE_BUCKET</key>
+	<string>rttraining-e7dae.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:473987561962:ios:8c6cec70ebd5a4213d1a93</string>
+</dict>
+</plist>
