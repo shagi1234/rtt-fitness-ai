@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ImageBackground,
   Alert,
+  Image,
   Pressable,
 } from "react-native";
 import { router } from "expo-router";
@@ -16,6 +17,7 @@ import ProgramsSlider from "./ProgramsSlider";
 import { SetupProgramCard } from "./SetupProgramCard";
 import { colors } from "@/constants/сolors";
 import { authService } from "@/lib/api/services/authService";
+import { contentService } from "@/lib/api/services/contentService";
 
 interface HomeScreenDefaultProps {
   programs: Program[];
@@ -54,6 +56,8 @@ export const HomeScreenDefault: React.FC<HomeScreenDefaultProps> = ({
   });
   const [isTestWorkoutLoading, setIsTestWorkoutLoading] = useState(false);
   const [workoutData, setWorkoutData] = useState<WorkoutData | null>(null);
+  const [showPaymentBanner, setShowPaymentBanner] = useState(false);
+  const [isPaymentLoading, setIsPaymentLoading] = useState(false);
   const [isLoadingTestWorkoutData, setIsLoadingTestWorkoutData] =
     useState(true);
 
@@ -110,6 +114,29 @@ export const HomeScreenDefault: React.FC<HomeScreenDefaultProps> = ({
 
     loadTestWorkout();
   }, []);
+
+    // Новый useEffect для получения настроек приложения
+    useEffect(() => {
+      const fetchAppSettings = async () => {
+        try {
+          const settingsResponse = await contentService.getAppSettings();
+  
+          // Ищем настройку payment_banner
+          const paymentBannerSetting = settingsResponse.settings.find(
+            (setting) => setting.key === "payment_banner"
+          );
+  
+          // Показываем баннер только если значение "on"
+          setShowPaymentBanner(paymentBannerSetting?.value === "on");
+        } catch (error) {
+          console.error("Failed to fetch app settings:", error);
+          // По умолчанию не показываем баннер при ошибке
+          setShowPaymentBanner(false);
+        }
+      };
+  
+      fetchAppSettings();
+    }, []);
 
   const handleStartTestWorkout = async () => {
     try {
@@ -193,6 +220,48 @@ export const HomeScreenDefault: React.FC<HomeScreenDefaultProps> = ({
       </View>
 
       <SetupProgramCard />
+
+         {/* Секция для рекламы покупки программы Усика - отображается только если showPaymentBanner=true */}
+         {showPaymentBanner && (
+        <View style={styles.championProgramSection}>
+          <View style={styles.championContentBox}>
+            <Image
+              source={require("../assets/images/usyk.png")}
+              style={styles.championImage}
+              resizeMode="cover"
+            />
+            <View style={styles.championOverlay}>
+              <View style={styles.championTextContainer}>
+                <Text style={styles.championTitle}>
+                  Training with the champion!
+                </Text>
+                <Text style={styles.championDescription}>
+                  20 workouts from Usyk{"\n"}for only $4.99
+                </Text>
+                <TouchableOpacity
+                  style={styles.getProgramButton}
+                  onPress={async () => {
+                    try {
+                      await contentService.sendPaymentPageRequest();
+                    } catch (error) {
+                      console.error(
+                        "Error sending payment page request:",
+                        error
+                      );
+                    }
+                    router.push("/usyk-program");
+                  }}
+                  disabled={isPaymentLoading}
+                >
+                  <Text style={styles.getProgramButtonText}>
+                    {isPaymentLoading ? "Loading..." : "Get program"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </View>
+      )}
 
       <View style={styles.bottomContainer}>
         {!isLoadingTestWorkoutData &&
@@ -349,6 +418,67 @@ const styles = StyleSheet.create({
   workoutInfo: {
     padding: 16,
     flex: 1,
+  },
+  championImage: {
+    width: "100%",
+    height: "100%",
+    borderRadius: 20,
+    position: "absolute",
+  },
+  championContentBox: {
+    backgroundColor: "transparent",
+    borderRadius: 20,
+    position: "relative",
+    height: 175,
+  },
+  championProgramSection: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
+  },
+  getProgramButtonText: {
+    color: "#000",
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 18,
+    letterSpacing: 0,
+  },
+  getProgramButton: {
+    backgroundColor: "#fff",
+    borderRadius: 200,
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    alignSelf: "flex-start",
+  },
+  championTextContainer: {
+    width: "50%",
+    justifyContent: "space-between",
+  },
+  championTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+    lineHeight: 22,
+    letterSpacing: 0,
+    marginBottom: 8,
+  },
+  championDescription: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "600",
+    lineHeight: 18,
+    letterSpacing: 0,
+    marginBottom: 16,
+  },
+  championOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    // backgroundColor: "rgba(0, 0, 0, 0.65)",
+    borderRadius: 20,
+    padding: 20,
+    flexDirection: "row",
   },
   workoutTitle: {
     fontSize: 16,

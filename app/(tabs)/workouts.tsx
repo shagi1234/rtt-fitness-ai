@@ -10,17 +10,19 @@ import {
   ActivityIndicator,
   FlatList,
 } from "react-native";
+import Card from "../../components/Card";
 import { StatusBar } from "expo-status-bar";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useEffect, useState } from "react";
-import api, { Program, Exercise, AvailableContentResponse } from "@/lib/api";
+import api, { Program, Exercise, AvailableContentResponse, Workout } from "@/lib/api";
 import { router } from "expo-router";
 import ProgramsSlider from "@/components/ProgramsSlider";
 import { defaultCardioIcon } from "@/lib/icon";
 import { GradientWrapper } from "@/components/GradientWrapper";
 import { SvgXml } from "react-native-svg";
 import { SafeAreaView } from "react-native-safe-area-context";
+
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -32,37 +34,45 @@ const ExerciseTag = ({ label, icon }: { label: string; icon?: string }) => (
   </View>
 );
 
-const ExerciseCard = ({ exercise }: { exercise: Exercise }) => (
-  <Pressable
-    style={styles.exerciseCard}
+const WorkoutsCard = ({ workout }: { workout: Workout }) => (
+  <Card 
+    id={workout.title}
+    title={workout.title}
+    imageUrl={workout.workout_desc_img}
+    type="workout"
+    stats={{
+      duration: `${workout.total_minutes} min`,
+      level: workout.dif_level,
+      calories: workout.calories,
+    }}
+    showStartButton={true}
     onPress={() =>
       router.push({
         pathname: "/(workout)/start",
         params: {
-          id: exercise.id,
-          title: exercise.title,
-          integration_type: "exercise",
+          title: workout.title.toLowerCase().trim(),
+          integration_type: "workout",
           exit_url: "/(tabs)",
+          id: workout.id,
+          plan: "1",
         },
       })
     }
-  >
-    <Image
-      source={exercise.thumbnail_url}
-      style={styles.exerciseImage}
-      contentFit="cover"
-    />
-    <LinearGradient
-      colors={["rgba(0,0,0,0)", "rgba(0,0,0,0.7)"]}
-      style={styles.exerciseGradient}
-    >
-      <Text style={styles.exerciseTitle}>{exercise.title}</Text>
-      <View style={styles.exerciseTagContainer}>
-        <ExerciseTag label="Cardio" icon={defaultCardioIcon} />
-      </View>
-    </LinearGradient>
-  </Pressable>
+    onStartPress={() =>
+      router.push({
+        pathname: "/(workout)/start",
+        params: {
+          title: workout.title.toLowerCase().trim(),
+          integration_type: "workout",
+          exit_url: "/(tabs)",
+          id: workout.id,
+          plan: "1",
+        },
+      })
+    }
+  />
 );
+
 
 const SectionHeader = ({
   title,
@@ -94,10 +104,13 @@ export default function WorkoutsScreen() {
       setLoading(true);
       const response = await api.content.getAvailableContent();
       setData(response);
+
       if (response && response.plans) {
         setPrograms(response.plans);
       }
+
       setError(null);
+
     } catch (err) {
       console.error("Error fetching workouts data:", err);
       setError("Failed to load workouts. Please try again later.");
@@ -157,16 +170,16 @@ export default function WorkoutsScreen() {
             />
           </View>
 
-          {/* Available Exercises Section */}
+          {/* Available Workouts Section */}
           <SectionHeader
-            title="Available exercises"
-            onPress={() => router.push("/available-exercises")}
+            title="Available workouts"
+            onPress={() => router.push("/available-workouts")}
           />
           <View style={styles.exercisesGrid}>
-            {data?.exercises && data.exercises.length > 0 ? (
+            {data?.workouts && data.workouts.length > 0 ? (
               <FlatList
-                data={data.exercises}
-                renderItem={({ item }) => <ExerciseCard exercise={item} />}
+                data={data.workouts}
+                renderItem={({ item }) => <WorkoutsCard workout={item} />}
                 keyExtractor={(item) => item.id}
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -224,10 +237,11 @@ const styles = StyleSheet.create({
   featuredProgramContainer: {
     marginBottom: 20,
   },
-  // Стили для упражнений
+
   exercisesGrid: {
     marginBottom: 24,
   },
+  
   exercisesListContainer: {
     paddingHorizontal: 16,
   },

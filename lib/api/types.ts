@@ -71,7 +71,7 @@ export interface Program {
 }
 
 export interface AvailableContentResponse {
-  exercises: Exercise[];
+  workouts: Workout[];
   plans: Program[];
 }
 
@@ -144,6 +144,7 @@ export interface MainPagePlan {
   started_workouts: number;
   workouts: number;
   finished_workouts: number;
+  finished_exercises: number;
 }
 
 export interface MainPageWorkout {

@@ -261,7 +261,7 @@ export default function AnalyticsScreen() {
                 <View style={styles.statCard}>
                   <SvgXml xml={analyticsExerciseIcon} width={24} height={24} />
                   <Text style={styles.statValue}>
-                    {profile?.completed_exercises || 0}
+                    {mainData?.plan?.[0]?.finished_exercises || 0}
                   </Text>
                   <Text style={styles.statLabel}>Exercises completed</Text>
                 </View>
@@ -274,7 +274,6 @@ export default function AnalyticsScreen() {
                   />
                   <Text style={styles.statValue}>
                     {mainData?.plan?.[0]?.started_workouts ||
-                      profile?.started_workouts ||
                       0}
                   </Text>
                   <Text style={styles.statLabel}>Workouts started</Text>

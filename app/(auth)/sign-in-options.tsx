@@ -149,27 +149,78 @@ export default function SignInOptions() {
       }
     }
   };
-
+  
   const onAppleButtonPress = async () => {
     try {
       const appleAuthRequestResponse = await appleAuth.performRequest({
         requestedOperation: appleAuth.Operation.LOGIN,
         requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL],
       });
+      
       // Ensure Apple returned a user identityToken
       if (!appleAuthRequestResponse.identityToken) {
         throw new Error("Apple Sign-In failed - no identify token returned");
       }
+      
       // Create a Firebase credential from the response
       const { identityToken, nonce } = appleAuthRequestResponse;
       console.log("identityToken", identityToken);
       console.log("nonce", nonce);
+      
       const appleCredential = auth.AppleAuthProvider.credential(
         identityToken,
         nonce
       );
+      
       // Sign the user in with the credential
-      return auth().signInWithCredential(appleCredential);
+      await auth().signInWithCredential(appleCredential);
+      
+      // Now call your backend API with the identity token
+      try {
+        const response = await authService.appleAuth(identityToken);
+        console.log("Apple auth response", response);
+        
+        // Check if we received tokens from our backend
+        if (response.access_token && response.refresh_token) {
+          // Save goal and level IDs if they exist in params
+          if (params.goal_id || params.level_id) {
+            await Promise.all([
+              AsyncStorage.setItem(
+                "user_goal_id",
+                String(Number(params.goal_id) || 1)
+              ),
+              AsyncStorage.setItem(
+                "user_level_id",
+                String(Number(params.level_id) || 1)
+              ),
+            ]);
+          }
+          
+          // Login using AuthContext
+          await login(response.access_token, response.refresh_token);
+          
+          // Navigate to setup intro or main page
+          router.replace("/(onboarding)/setup-intro");
+        }
+      } catch (apiError: any) {
+        console.error("API Authentication error:", apiError);
+        // Check if it's a 404 (user not found)
+        if (apiError && apiError.status === 404) {
+          Alert.alert(
+            "Not Registered",
+            "This account is not registered. Please sign up first.",
+            [
+              {
+                text: "OK",
+                onPress: () => router.replace("/(auth)/quiz/goal"),
+              },
+            ]
+          );
+        } else {
+          Alert.alert("Error", "Failed to authenticate with server");
+        }
+      }
+      
     } catch (error: any) {
       if (error.code !== "ERR_CANCELED") {
         console.error("Apple Sign-In Error:", error);
@@ -278,6 +329,21 @@ export default function SignInOptions() {
               <Text style={styles.buttonText}>Continue with Google</Text>
             </View>
           </Pressable>
+
+          {/* Apple Button - Only show on iOS */}
+          {Platform.OS === "ios" && (
+            <Pressable style={styles.authButton} onPress={onAppleButtonPress}>
+              <View style={styles.buttonContent}>
+                <AntDesign
+                  name="apple1"
+                  size={20}
+                  color="#000000"
+                  style={styles.buttonIcon}
+                />
+                <Text style={styles.buttonText}>Continue with Apple</Text>
+              </View>
+            </Pressable>
+          )}
         </View>
 
         {/* Agreement Text */}

@@ -44,8 +44,8 @@ export default function WorkoutStart() {
     company: "Ready to Fight",
     customParameters: {
       //   style: "light", // dark or light theme (customizable in the admin dashboard)
-      videoURL:
-        "https://cdn.kinestex.com/uploads%2F2047b732-0206-4bb9-9e15-e92fddaabefb_jz73VFlUyZ9nyd64OjRb.mp4?alt=media&token=3135ff52-3014-43b2-938e-024c280f92e5",
+      // videoURL:
+        // "https://cdn.kinestex.com/uploads%2F2047b732-0206-4bb9-9e15-e92fddaabefb_jz73VFlUyZ9nyd64OjRb.mp4?alt=media&token=3135ff52-3014-43b2-938e-024c280f92e5",
     },
   });
   const [showTabBar, setShowTabBar] = useState(true);
@@ -53,6 +53,8 @@ export default function WorkoutStart() {
   const [showCameraPermissionScreen, setShowCameraPermissionScreen] =
     useState(false);
   const [testWorkoutStarted, setTestWorkoutStarted] = useState(false);
+  const startedWorkouts = new Set<string>();
+  const startedWorkoutIdRef = useRef<string | null>(null);
 
   // Проверяем разрешение камеры при загрузке компонента
   useEffect(() => {
@@ -86,6 +88,7 @@ export default function WorkoutStart() {
       return !params.title;
     }
   };
+  
   useEffect(() => {
     const initializeUserId = async () => {
       try {
@@ -203,6 +206,9 @@ export default function WorkoutStart() {
     </View>
   );
 
+  // Determine if we should show the tab bar
+  const shouldShowTabBar = showTabBar && params.exit_url !== "/(auth)/test-workout";
+
   const handleMessage = async (type: string, data: { [key: string]: any }) => {
     switch (type) {
       case "kinestex_launched":
@@ -284,7 +290,9 @@ export default function WorkoutStart() {
 
       case "workout_started":
         console.log("Workout started:", data);
-        // Показываем TabBar при начале тренировки
+
+        startedWorkouts.clear();
+
         if (params.type !== "test") {
           setShowTabBar(false);
         }
@@ -295,26 +303,71 @@ export default function WorkoutStart() {
         console.log(`${type}:`, data);
         console.log("Workout opened with params:", params);
 
-        if (
-          !params.type ||
-          params.type !== "test" ||
-          postData.userId !== "default_user_id"
-        ) {
-          try {
-            const workoutData = {
-              plan: params.type !== "test", // false для тестовых тренировок, true для обычных
-              workout_id: Array.isArray(params.id) ? params.id[0] : params.id,
-            };
-            // Отправляем запрос на API
-            await contentService.trackWorkoutStarted(workoutData);
-          } catch (error) {
-            console.error("Failed to track workout start:", error);
-            // Не прерываем процесс даже при ошибке отправки данных
+        const getWorkoutId = (
+          integrationType: IntegrationOption,
+          params: any,
+          data: any
+        ): string => {
+          if (integrationType === IntegrationOption.WORKOUT) {
+            return Array.isArray(params.id) ? params.id[0] : params.id;
+          } else {
+            return String(data["id"]);
           }
-        } else if (params.type === "test" && !testWorkoutStarted) {
-          setTestWorkoutStarted(true);
-          await contentService.startTestWorkout();
+        };
+        
+        startedWorkoutIdRef.current = null;
+
+        const workoutId: string = getWorkoutId(integrationType, params, data);
+        startedWorkoutIdRef.current = workoutId;
+
+        if (startedWorkouts.has(workoutId)) {
+          console.log(
+            "Workout already started, skipping duplicate request for ID:",
+            workoutId
+          );
+          break;
         }
+        
+        if (params.type === "test" && postData.userId === "default_user_id") {
+          if (!testWorkoutStarted) {
+            setTestWorkoutStarted(true);
+            try {
+              await contentService.startTestWorkout();
+            } catch (error) {
+              console.error("Failed to start test workout:", error);
+            }
+          }
+          break;
+        }
+
+        try {
+          startedWorkouts.add(workoutId);
+
+          const getCurrentDate = (): string => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, "0");
+            const day = String(now.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+          };
+
+          const workoutData = {
+            plan: params.type !== "test" && params.plan !== "1", 
+            workout_id: workoutId,
+            day_id: getCurrentDate(),
+          };
+
+          console.log(
+            "Tracking workout start with workoutData:",
+            workoutData
+          );
+          
+          await contentService.trackWorkoutStarted(workoutData);
+        } catch (error) {
+          console.error("Failed to track workout start:", error);
+          startedWorkouts.delete(workoutId);
+        }
+
         break;
 
       case "plan_started":
@@ -343,7 +396,7 @@ export default function WorkoutStart() {
             const exerciseData = {
               plan: params.type !== "test",
             };
-
+            // 3Xcv4GOFkPd0pDicOSFL, workout: mGbKzqeHayiAFxRV3LAI
             // Отправляем запрос на API exercise-finished
             await contentService.trackExerciseFinished(exerciseData);
           } catch (error) {
@@ -351,6 +404,7 @@ export default function WorkoutStart() {
             // Не прерываем процесс даже при ошибке отправки данных
           }
         }
+
         break;
 
       case "workout_overview":
@@ -373,6 +427,7 @@ export default function WorkoutStart() {
             // Не прерываем процесс даже при ошибке отправки данных
           }
         }
+        
         if (
           type === "workout_overview" &&
           params.integration_type !== "exercise" &&
@@ -382,26 +437,26 @@ export default function WorkoutStart() {
         ) {
           try {
             const calories = Number(data.data.total_calories);
+            const workoutIdToSend = startedWorkoutIdRef.current || params.id;
+             
+            console.log(`[LOG] Sending workout_finished with workout_id: ${workoutIdToSend}`);
 
-            // Подготавливаем данные для API
             const caloriesData = {
               calories: calories,
-              plan: params.type !== "test", // false для тестовых тренировок, true для обычных
+              plan: params.type !== "test" && params.plan !== "1", // false для тестовых тренировок, true для обычных
             };
-
+          
             // Отправляем запрос на API fired-calories
             await contentService.trackFiredCalories(caloriesData);
-
             // Подготавливаем данные для API workout-finished
             const workoutFinishedData = {
               activity_time: data.data.total_time_spent,
               calories: data.data.total_calories,
-              plan: true,
-              workout_id: params.id,
+              plan: params.plan !== "1",
+              workout_id: workoutIdToSend,
               date: new Date().toISOString().split("T")[0],
             };
-
-            // Отправляем запрос на API workout-finished
+            console.log("[LOG] workoutFinishedData:", workoutFinishedData);
             await contentService.trackWorkoutFinished(workoutFinishedData);
           } catch (error) {
             console.error("Failed to track fired calories:", error);
@@ -445,7 +500,6 @@ export default function WorkoutStart() {
               console.warn("Failed to set plan");
             }
           } else if (data && data.plan_id) {
-            // Запасной вариант, если ID не пришел из параметров
             const success = await api.content.setPlanForUser(data.plan_id);
             if (success) {
               console.log("Plan set successfully:", data.plan_id);
@@ -482,7 +536,7 @@ export default function WorkoutStart() {
 
   return (
     <SafeAreaView
-      style={[styles.container, showTabBar && styles.containerWithTabBar]}
+      style={[styles.container, shouldShowTabBar && styles.containerWithTabBar]}
       edges={Platform.OS === "ios" ? ["top"] : []}
     >
       <KinestexSDK
@@ -492,9 +546,7 @@ export default function WorkoutStart() {
         {...sdkProps}
         handleMessage={handleMessage}
       />
-      {showTabBar &&
-        params.type !== "test" &&
-        params.exit_url !== "/(auth)/test-workout" && <FakeTabBar />}
+      {shouldShowTabBar && <FakeTabBar />}
     </SafeAreaView>
   );
 }
