@@ -36,7 +36,6 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 GoogleSignin.configure({
   webClientId:
     "473987561962-b47054msl1ef8rkk50qvf8gtfmb7ev8t.apps.googleusercontent.com",
-  // "473987561962-b47054msl1ef8rkk50qvf8gtfmb7ev8t.apps.googleusercontent.com"
 });
 
 export default function Auth() {

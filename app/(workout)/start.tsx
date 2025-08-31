@@ -124,6 +124,25 @@ export default function WorkoutStart() {
     initializeUserId();
   }, [params.type]);
 
+  // Debug function to log complete state
+  const logCompleteState = () => {
+    console.log("=== COMPLETE COMPONENT STATE DEBUG ===");
+    console.log("URL Search Params:", JSON.stringify(params, null, 2));
+    console.log("Integration Type:", integrationType);
+    console.log("Post Data:", JSON.stringify(postData, null, 2));
+    console.log("Show Tab Bar:", showTabBar);
+    console.log("Should Show Tab Bar:", shouldShowTabBar);
+    console.log("Test Workout Started:", testWorkoutStarted);
+    console.log("Started Workout ID:", startedWorkoutIdRef.current);
+    console.log("Camera Permission:", cameraPermission);
+    console.log("====================================");
+  };
+
+  // Log complete state whenever key values change
+  useEffect(() => {
+    logCompleteState();
+  }, [params, postData, integrationType, showTabBar, testWorkoutStarted]);
+
   // Проверяем наличие необходимых параметров
   if (isMissingParams()) {
     const errorMessage = (() => {
@@ -210,6 +229,14 @@ export default function WorkoutStart() {
   const shouldShowTabBar = showTabBar && params.exit_url !== "/(auth)/test-workout";
 
   const handleMessage = async (type: string, data: { [key: string]: any }) => {
+    // Enhanced logging for all SDK messages
+    console.log("=== SDK MESSAGE RECEIVED ===");
+    console.log("Message Type:", type);
+    console.log("Message Data:", JSON.stringify(data, null, 2));
+    console.log("Current Params:", JSON.stringify(params, null, 2));
+    console.log("Integration Type:", integrationType);
+    console.log("===========================");
+
     switch (type) {
       case "kinestex_launched":
         console.log("KinesteX launched:", data);
@@ -520,19 +547,45 @@ export default function WorkoutStart() {
     }
   };
 
-  // Определяем параметры для KinestexSDK в зависимости от типа интеграции
+  // Enhanced SDK props function with logging
   const getSdkProps = () => {
+    let props;
     switch (integrationType) {
       case IntegrationOption.PLAN:
-        return { plan: params.id as string };
+        props = { plan: params.id as string };
+        break;
       case IntegrationOption.CHALLENGE:
-        return {};
+        props = {};
+        break;
       default:
-        return { workout: params.title as string };
+        props = { workout: params.id as string };
+        break;
     }
+    
+    // Log the props being sent to SDK
+    console.log("=== SDK PROPS DEBUG ===");
+    console.log("Integration Type:", integrationType);
+    console.log("URL Params:", JSON.stringify(params, null, 2));
+    console.log("SDK Props:", JSON.stringify(props, null, 2));
+    console.log("Post Data:", JSON.stringify(postData, null, 2));
+    console.log("======================");
+    
+    return props;
   };
 
   const sdkProps = getSdkProps();
+
+  // Log complete SDK configuration before rendering
+  console.log("=== COMPLETE SDK CONFIGURATION ===");
+  console.log("Integration Option:", integrationType);
+  console.log("SDK Props:", JSON.stringify(sdkProps, null, 2));
+  console.log("Post Data:", JSON.stringify(postData, null, 2));
+  console.log("Full SDK Config Object:", {
+    data: postData,
+    integrationOption: integrationType,
+    ...sdkProps
+  });
+  console.log("=================================");
 
   return (
     <SafeAreaView

@@ -14,6 +14,22 @@
       },
       "oauth_client": [
         {
+          "client_id": "473987561962-ejhdqtek6gn01gden438mtpn37aeclhf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.readytotraining",
+            "certificate_hash": "7d558cb593ca0f053f008574bae9bff85e4c6f61"
+          }
+        },
+        {
+          "client_id": "473987561962-oefkd188kcr1lk88d2uqc8fmj4rcck64.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.readytotraining",
+            "certificate_hash": "2990bfdfeeb9063145c0899dba5e9317debcf32d"
+          }
+        },
+        {
           "client_id": "473987561962-b47054msl1ef8rkk50qvf8gtfmb7ev8t.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -53,7 +53,10 @@ const WorkoutCard = ({ workout }: { workout: Workout }) => (
       calories: workout.calories,
     }}
     showStartButton={true}
-    onPress={() =>
+    onPress={() =>{
+      console.log(" available workout.workout_id ejjen blat", workout.workout_id);
+      console.log(" available workout.id ejjen blat", workout.id);
+      
       router.push({
         pathname: "/(workout)/start",
         params: {
@@ -63,7 +66,8 @@ const WorkoutCard = ({ workout }: { workout: Workout }) => (
           id: workout.id,
           plan: "1",
         },
-      })
+      })        
+    }
     }
     onStartPress={() =>
       router.push({

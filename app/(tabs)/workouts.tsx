@@ -46,7 +46,10 @@ const WorkoutsCard = ({ workout }: { workout: Workout }) => (
       calories: workout.calories,
     }}
     showStartButton={true}
-    onPress={() =>
+    onPress={() =>{
+      console.log("workouts workout.workout_id ejjen blat", workout.workout_id);
+      console.log("workouts workout.id ejjen blat", workout.id);
+
       router.push({
         pathname: "/(workout)/start",
         params: {
@@ -58,7 +61,12 @@ const WorkoutsCard = ({ workout }: { workout: Workout }) => (
         },
       })
     }
-    onStartPress={() =>
+      
+    }
+    onStartPress={() =>{
+      console.log("workouts workout.workout_id ejjen blat", workout.workout_id);
+      console.log("workouts workout.id ejjen blat", workout.id);
+
       router.push({
         pathname: "/(workout)/start",
         params: {
@@ -69,6 +77,7 @@ const WorkoutsCard = ({ workout }: { workout: Workout }) => (
           plan: "1",
         },
       })
+    }
     }
   />
 );

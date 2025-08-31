@@ -237,7 +237,23 @@ export const HomeScreenActive: React.FC<HomeScreenActiveProps> = ({
                 calories: workout.calories,
               }}
               showStartButton={true}
-              onPress={() =>
+              onPress={() =>{
+                console.log("workout.workout_id ejjen blat", workout.workout_id);
+                
+                router.push({
+                  pathname: "/(workout)/start",
+                  params: {
+                    title: workout.title.toLowerCase().trim(),
+                    integration_type: "workout",
+                    exit_url: "/(tabs)",
+                    id: workout.workout_id,
+                  },
+                })
+              }}
+              onStartPress={() =>
+              {
+                console.log("workout.workout_id ejjen blat", workout.workout_id);
+                
                 router.push({
                   pathname: "/(workout)/start",
                   params: {
@@ -248,16 +264,6 @@ export const HomeScreenActive: React.FC<HomeScreenActiveProps> = ({
                   },
                 })
               }
-              onStartPress={() =>
-                router.push({
-                  pathname: "/(workout)/start",
-                  params: {
-                    title: workout.title.toLowerCase().trim(),
-                    integration_type: "workout",
-                    exit_url: "/(tabs)",
-                    id: workout.workout_id,
-                  },
-                })
               }
             />
           ) : (

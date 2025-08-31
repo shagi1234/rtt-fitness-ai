@@ -120,13 +120,14 @@ export default function TestWorkout() {
         router.push({
           pathname: "/(workout)/start",
           params: {
-            title: workout.title,
+            title: workout.title.toLowerCase().trim(),
             exit_url: "/(auth)/test-workout",
             completed_url: "/(auth)/auth",
             goal_id: goalId.toString(),
             level_id: levelId.toString(),
             type: "test",
             integration_type: "workout",
+            id: workout.workout_id,
           },
         });
       } else {

@@ -176,7 +176,7 @@ export interface Workout {
   dif_level: string;
   body_parts: string[];
   description: string;
-  workout_id: Record<string, any>;
+  workout_id: string; // Changed from Record<string, any> to string
 }
 
 export interface TestWorkoutResponse {
